@@ -15,7 +15,7 @@ import time
 import numpy as np
 import openai
 import requests
-from decord import VideoReader, cpu
+# from decord import VideoReader, cpu
 from PIL import Image
 
 # pip install httpx==0.23.3
@@ -125,27 +125,27 @@ def multi_image_stream_request_test(client):
     print("-" * 30)
 
 
-def video_stream_request_test(client, video_path):
-    print("------------------------Video Stream Request Test----------------------")
-    messages = prepare_video_messages(video_path)
-
-    video_request = client.chat.completions.create(
-        model="default",
-        messages=messages,
-        temperature=0,
-        max_tokens=1024,
-        stream=True,
-    )
-    print("-" * 30)
-    video_response = ""
-
-    for chunk in video_request:
-        if chunk.choices[0].delta.content is not None:
-            content = chunk.choices[0].delta.content
-            video_response += content
-            sys.stdout.write(content)
-            sys.stdout.flush()
-    print("-" * 30)
+# def video_stream_request_test(client, video_path):
+#     print("------------------------Video Stream Request Test----------------------")
+#     messages = prepare_video_messages(video_path)
+# 
+#     video_request = client.chat.completions.create(
+#         model="default",
+#         messages=messages,
+#         temperature=0,
+#         max_tokens=1024,
+#         stream=True,
+#     )
+#     print("-" * 30)
+#     video_response = ""
+# 
+#     for chunk in video_request:
+#         if chunk.choices[0].delta.content is not None:
+#             content = chunk.choices[0].delta.content
+#             video_response += content
+#             sys.stdout.write(content)
+#             sys.stdout.flush()
+#     print("-" * 30)
 
 
 def image_speed_test(client):
@@ -180,56 +180,56 @@ def image_speed_test(client):
     print_speed_test_results(request, start_time, end_time)
 
 
-def video_speed_test(client, video_path):
-    print("------------------------Video Speed Test------------------------")
-    messages = prepare_video_messages(video_path)
+# def video_speed_test(client, video_path):
+#     print("------------------------Video Speed Test------------------------")
+#     messages = prepare_video_messages(video_path)
+# 
+#     start_time = time.time()
+#     video_request = client.chat.completions.create(
+#         model="default",
+#         messages=messages,
+#         temperature=0,
+#         max_tokens=1024,
+#     )
+#     end_time = time.time()
+#     video_response = video_request.choices[0].message.content
+#     print(video_response)
+#     print("-" * 30)
+#     print_speed_test_results(video_request, start_time, end_time)
 
-    start_time = time.time()
-    video_request = client.chat.completions.create(
-        model="default",
-        messages=messages,
-        temperature=0,
-        max_tokens=1024,
-    )
-    end_time = time.time()
-    video_response = video_request.choices[0].message.content
-    print(video_response)
-    print("-" * 30)
-    print_speed_test_results(video_request, start_time, end_time)
 
-
-def prepare_video_messages(video_path):
-    max_frames_num = 32
-    vr = VideoReader(video_path, ctx=cpu(0))
-    total_frame_num = len(vr)
-    uniform_sampled_frames = np.linspace(
-        0, total_frame_num - 1, max_frames_num, dtype=int
-    )
-    frame_idx = uniform_sampled_frames.tolist()
-    frames = vr.get_batch(frame_idx).asnumpy()
-
-    base64_frames = []
-    for frame in frames:
-        pil_img = Image.fromarray(frame)
-        buff = io.BytesIO()
-        pil_img.save(buff, format="JPEG")
-        base64_str = base64.b64encode(buff.getvalue()).decode("utf-8")
-        base64_frames.append(base64_str)
-
-    messages = [{"role": "user", "content": []}]
-
-    for base64_frame in base64_frames:
-        frame_format = {
-            "type": "image_url",
-            "image_url": {"url": f"data:image/jpeg;base64,{base64_frame}"},
-            "modalities": "video",
-        }
-        messages[0]["content"].append(frame_format)
-
-    prompt = {"type": "text", "text": "Please describe the video in detail."}
-    messages[0]["content"].append(prompt)
-
-    return messages
+# def prepare_video_messages(video_path):
+#     max_frames_num = 32
+#     vr = VideoReader(video_path, ctx=cpu(0))
+#     total_frame_num = len(vr)
+#     uniform_sampled_frames = np.linspace(
+#         0, total_frame_num - 1, max_frames_num, dtype=int
+#     )
+#     frame_idx = uniform_sampled_frames.tolist()
+#     frames = vr.get_batch(frame_idx).asnumpy()
+# 
+#     base64_frames = []
+#     for frame in frames:
+#         pil_img = Image.fromarray(frame)
+#         buff = io.BytesIO()
+#         pil_img.save(buff, format="JPEG")
+#         base64_str = base64.b64encode(buff.getvalue()).decode("utf-8")
+#         base64_frames.append(base64_str)
+# 
+#     messages = [{"role": "user", "content": []}]
+# 
+#     for base64_frame in base64_frames:
+#         frame_format = {
+#             "type": "image_url",
+#             "image_url": {"url": f"data:image/jpeg;base64,{base64_frame}"},
+#             "modalities": "video",
+#         }
+#         messages[0]["content"].append(frame_format)
+# 
+#     prompt = {"type": "text", "text": "Please describe the video in detail."}
+#     messages[0]["content"].append(prompt)
+# 
+#     return messages
 
 
 def print_speed_test_results(request, start_time, end_time):

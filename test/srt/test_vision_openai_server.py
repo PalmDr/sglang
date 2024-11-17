@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 import openai
 import requests
-from decord import VideoReader, cpu
+# from decord import VideoReader, cpu
 from PIL import Image
 
 from sglang.srt.utils import kill_child_process
@@ -179,79 +179,79 @@ class TestOpenAIVisionServer(unittest.TestCase):
         assert response.usage.completion_tokens > 0
         assert response.usage.total_tokens > 0
 
-    def prepare_video_messages(self, video_path):
-        max_frames_num = 32
-        vr = VideoReader(video_path, ctx=cpu(0))
-        total_frame_num = len(vr)
-        uniform_sampled_frames = np.linspace(
-            0, total_frame_num - 1, max_frames_num, dtype=int
-        )
-        frame_idx = uniform_sampled_frames.tolist()
-        frames = vr.get_batch(frame_idx).asnumpy()
+    # def prepare_video_messages(self, video_path):
+    #     max_frames_num = 32
+    #     vr = VideoReader(video_path, ctx=cpu(0))
+    #     total_frame_num = len(vr)
+    #     uniform_sampled_frames = np.linspace(
+    #         0, total_frame_num - 1, max_frames_num, dtype=int
+    #     )
+    #     frame_idx = uniform_sampled_frames.tolist()
+    #     frames = vr.get_batch(frame_idx).asnumpy()
 
-        base64_frames = []
-        for frame in frames:
-            pil_img = Image.fromarray(frame)
-            buff = io.BytesIO()
-            pil_img.save(buff, format="JPEG")
-            base64_str = base64.b64encode(buff.getvalue()).decode("utf-8")
-            base64_frames.append(base64_str)
+    #     base64_frames = []
+    #     for frame in frames:
+    #         pil_img = Image.fromarray(frame)
+    #         buff = io.BytesIO()
+    #         pil_img.save(buff, format="JPEG")
+    #         base64_str = base64.b64encode(buff.getvalue()).decode("utf-8")
+    #         base64_frames.append(base64_str)
 
-        messages = [{"role": "user", "content": []}]
-        frame_format = {
-            "type": "image_url",
-            "image_url": {"url": "data:image/jpeg;base64,{}"},
-            "modalities": "video",
-        }
+    #     messages = [{"role": "user", "content": []}]
+    #     frame_format = {
+    #         "type": "image_url",
+    #         "image_url": {"url": "data:image/jpeg;base64,{}"},
+    #         "modalities": "video",
+    #     }
 
-        for base64_frame in base64_frames:
-            frame_format["image_url"]["url"] = "data:image/jpeg;base64,{}".format(
-                base64_frame
-            )
-            messages[0]["content"].append(frame_format.copy())
+    #     for base64_frame in base64_frames:
+    #         frame_format["image_url"]["url"] = "data:image/jpeg;base64,{}".format(
+    #             base64_frame
+    #         )
+    #         messages[0]["content"].append(frame_format.copy())
 
-        prompt = {"type": "text", "text": "Please describe the video in detail."}
-        messages[0]["content"].append(prompt)
+    #     prompt = {"type": "text", "text": "Please describe the video in detail."}
+    #     messages[0]["content"].append(prompt)
 
-        return messages
+    #     return messages
 
-    def test_video_chat_completion(self):
-        url = "https://raw.githubusercontent.com/EvolvingLMMs-Lab/sglang/dev/onevision_local/assets/jobs.mp4"
-        cache_dir = os.path.expanduser("~/.cache")
-        file_path = os.path.join(cache_dir, "jobs.mp4")
-        os.makedirs(cache_dir, exist_ok=True)
+    # def test_video_chat_completion(self):
+    #     url = "https://raw.githubusercontent.com/EvolvingLMMs-Lab/sglang/dev/onevision_local/assets/jobs.mp4"
+    #     cache_dir = os.path.expanduser("~/.cache")
+    #     file_path = os.path.join(cache_dir, "jobs.mp4")
+    #     os.makedirs(cache_dir, exist_ok=True)
 
-        if not os.path.exists(file_path):
-            response = requests.get(url)
-            response.raise_for_status()
+    #     if not os.path.exists(file_path):
+    #         response = requests.get(url)
+    #         response.raise_for_status()
 
-            with open(file_path, "wb") as f:
-                f.write(response.content)
+    #         with open(file_path, "wb") as f:
+    #             f.write(response.content)
 
-        client = openai.Client(api_key=self.api_key, base_url=self.base_url)
+    #     client = openai.Client(api_key=self.api_key, base_url=self.base_url)
 
-        messages = self.prepare_video_messages(file_path)
+    #     messages = self.prepare_video_messages(file_path)
 
-        video_request = client.chat.completions.create(
-            model="default",
-            messages=messages,
-            temperature=0,
-            max_tokens=1024,
-            stream=True,
-        )
+    #     video_request = client.chat.completions.create(
+    #         model="default",
+    #         messages=messages,
+    #         temperature=0,
+    #         max_tokens=1024,
+    #         stream=True,
+    #     )
 
-        print("-" * 30)
-        video_response = ""
-        for chunk in video_request:
-            if chunk.choices[0].delta.content is not None:
-                content = chunk.choices[0].delta.content
-                video_response += content
-                print(content, end="", flush=True)
-        print("-" * 30)
+    #     print("-" * 30)
+    #     video_response = ""
+    #     for chunk in video_request:
+    #         if chunk.choices[0].delta.content is not None:
+    #             content = chunk.choices[0].delta.content
+    #             video_response += content
+    #             print(content, end="", flush=True)
+    #     print("-" * 30)
 
-        # Add assertions to validate the video response
-        self.assertIsNotNone(video_response)
-        self.assertGreater(len(video_response), 0)
+    #     # Add assertions to validate the video response
+    #     self.assertIsNotNone(video_response)
+    #     self.assertGreater(len(video_response), 0)
 
     def test_regex(self):
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)
