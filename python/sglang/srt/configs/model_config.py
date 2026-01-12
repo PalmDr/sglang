@@ -1082,6 +1082,7 @@ multimodal_model_archs = [
     "Sarashina2VisionForCausalLM",
     "NVILAForConditionalGeneration",
     "NVILALiteForConditionalGeneration",
+    "OpenVLAForActionPrediction",
     "DeepseekOCRForCausalLM",
     "JetVLMForConditionalGeneration",
     "PaddleOCRVLForConditionalGeneration",
