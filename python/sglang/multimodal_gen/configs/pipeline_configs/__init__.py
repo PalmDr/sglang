@@ -23,6 +23,12 @@ from sglang.multimodal_gen.configs.pipeline_configs.wan import (
     WanT2V720PConfig,
 )
 from sglang.multimodal_gen.configs.pipeline_configs.zimage import ZImagePipelineConfig
+from sglang.multimodal_gen.configs.pipeline_configs.cosmos import (
+    CosmosText2WorldConfig,
+    CosmosText2World14BConfig,
+    CosmosImage2WorldConfig,
+    CosmosVideo2WorldConfig,
+)
 
 __all__ = [
     "DiffusersGenericPipelineConfig",
@@ -38,4 +44,8 @@ __all__ = [
     "WanI2V720PConfig",
     "SelfForcingWanT2V480PConfig",
     "ZImagePipelineConfig",
+    "CosmosText2WorldConfig",
+    "CosmosText2World14BConfig",
+    "CosmosImage2WorldConfig",
+    "CosmosVideo2WorldConfig",
 ]

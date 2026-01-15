@@ -42,6 +42,11 @@ from sglang.multimodal_gen.configs.pipeline_configs.flux import Flux2PipelineCon
 from sglang.multimodal_gen.configs.pipeline_configs.glm_image import (
     GlmImagePipelineConfig,
 )
+from sglang.multimodal_gen.configs.pipeline_configs.cosmos import (
+    CosmosText2WorldConfig,
+    CosmosText2World14BConfig,
+    CosmosImage2WorldConfig,
+)
 from sglang.multimodal_gen.configs.pipeline_configs.qwen_image import (
     QwenImageEditPipelineConfig,
     QwenImageEditPlus_2511_PipelineConfig,
@@ -83,6 +88,10 @@ from sglang.multimodal_gen.configs.sample.wan import (
     WanT2V_14B_SamplingParams,
 )
 from sglang.multimodal_gen.configs.sample.zimage import ZImageSamplingParams
+from sglang.multimodal_gen.configs.sample.cosmos import (
+    CosmosSamplingParams,
+    CosmosImage2WorldSamplingParams,
+)
 from sglang.multimodal_gen.runtime.pipelines_core.composed_pipeline_base import (
     ComposedPipelineBase,
 )
@@ -589,6 +598,38 @@ def _register_configs():
         sampling_param_cls=GlmImageSamplingParams,
         pipeline_config_cls=GlmImagePipelineConfig,
         model_detectors=[lambda hf_id: "glm-image" in hf_id.lower()],
+    )
+
+    # NVIDIA Cosmos Predict 2.5 (World Foundation Models)
+    register_configs(
+        sampling_param_cls=CosmosSamplingParams,
+        pipeline_config_cls=CosmosText2WorldConfig,
+        hf_model_paths=[
+            "nvidia/Cosmos-Predict2.5-2B",
+            "nvidia/Cosmos-Predict2-2B-Text2World",
+        ],
+        model_detectors=[
+            lambda hf_id: "cosmos" in hf_id.lower() and "text2world" in hf_id.lower(),
+            lambda hf_id: "cosmostexttoworld" in hf_id.lower(),
+        ],
+    )
+    register_configs(
+        sampling_param_cls=CosmosSamplingParams,
+        pipeline_config_cls=CosmosText2World14BConfig,
+        hf_model_paths=[
+            "nvidia/Cosmos-Predict2.5-14B",
+        ],
+    )
+    register_configs(
+        sampling_param_cls=CosmosImage2WorldSamplingParams,
+        pipeline_config_cls=CosmosImage2WorldConfig,
+        hf_model_paths=[
+            "nvidia/Cosmos-Predict2-2B-Image2World",
+        ],
+        model_detectors=[
+            lambda hf_id: "cosmos" in hf_id.lower() and "image2world" in hf_id.lower(),
+            lambda hf_id: "cosmosimagetoworld" in hf_id.lower(),
+        ],
     )
 
 
